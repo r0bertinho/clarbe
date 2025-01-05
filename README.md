@@ -7,3 +7,7 @@ I were tired of reading incredible C/C++ committee proposal papers which were no
 ## Information
 
 Of course this compiler doesn't follow the full C standard, since it's made by a single dev ;-;
+
+## Dependencies
+ - curl
+ - tomlplusplus

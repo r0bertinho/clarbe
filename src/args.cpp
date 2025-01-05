@@ -1,16 +1,4 @@
 #include "args.hpp"
-#include "regex.h"
-#include <cstring>
-
-/*
-* is_flag(arg)
-* 
-* Checks if the provided argument is a flag, which is defined as starting with a '-'.
-*/
-bool is_flag( char* arg )
-{
-  return *arg == '-';
-}
 
 /*
 * has_arg(argv, arg_r)
@@ -18,8 +6,9 @@ bool is_flag( char* arg )
 * Checks if a specific argument exists in the provided input.
 * Forgiving argument recognition.
 */
-int has_arg( char* argv, char* arg_r )
+int has_arg( char* argv_, const char* arg_r )
 {
+#ifdef use_c_regex
   regex_t regex;
   int reti;
     
@@ -29,7 +18,7 @@ int has_arg( char* argv, char* arg_r )
     return 2; // Could not compile regex
   }
     
-  reti = regexec(&regex, argv, 0, NULL, 0);
+  reti = regexec(&regex, argv_, 0, NULL, 0);
 
   if ( !reti )
   {
@@ -40,45 +29,25 @@ int has_arg( char* argv, char* arg_r )
     return 1; // not found
   } else
   {
-    regerror(reti, &regex, argv, sizeof(argv));
+    regerror(reti, &regex, argv_, sizeof(argv_));
     return 2; // Regex match failed
   }
   
   regfree(&regex);
+#else
+  std::regex regex(arg_r);
+  
+  try
+  {
+    if ( std::regex_search(argv_, regex) )
+    {
+      return 0;
+    }
+  } catch ( ... )
+  {
+    return 2;
+  }
+#endif
   
   return 1;
-}
-
-/* just for good measure */
-inline int has_arg( char** argv, char* arg_r )
-{
-  char string[64];
-  altoc<64>(string, argv);
-  return has_arg(string, arg_r);
-}
-
-template < size_t str_size = 64 >
-inline void altoc(char out[str_size], char** argv)
-{
-  char full_str[str_size];
-  int local = 0;
-    
-  for ( int i = 1; *(argv + i) != NULL; i++ )
-  {
-    for ( int j = 0; *(*(argv + i) + j) != NULL; j++ )
-    {
-      full_str[local] = *(*(argv + i) + j);
-      local++;
-    }
-        
-    if ( *(argv + i) == NULL )
-      full_str[local] = '\0';
-    else
-    {
-      full_str[local] = ' ';
-      local++;
-    }
-  }
-    
-  std::strcpy(out, full_str);
 }

@@ -1,149 +1,230 @@
 #include <iostream>
+#include <cstring>
 
-#include "files.hpp"
-#include "lexer.hpp"
+#include "commands/files.hpp"
 #include "args.hpp"
 #include "messages.h"
-#include "procedures.hpp"
 #include "consts.hpp"
 
 int main( int argc, char **argv )
 {
+	#ifdef _WIN32
+	if ( !_dupenv_s(&clarbe_env, &clarbe_env_s, "CLARBE_HOME") && clarbe_env != nullptr )
+  { // no error
+  } else
+	{
+		std::cout << "\'CLARBE_HOME\' environment variable not defined. closing...\n";
+		goto exit_w_error;
+	}
+	#endif
+
 /* --------------------
 		Error cases
    -------------------- */
 	if ( clarbe_env == NULL) // Check if environment variable exists
 	{
 		std::cerr << "No working directory defined for clarbe.\n";
-		return 1;
+		goto exit_w_error;
 	}
 
 /* --------------------
 		Commands
    -------------------- */
-	if ( !has_arg(argv, "-?-?h(?:elp)?") ) // help command
+	if ( !has_arg(argv[1], "-?-?h(?:elp)?") ) // help command
 	{
 		std::cout << HELP_MSG;
-		return 0;
+		goto exit_no_error;
 	} else
-	if ( !has_arg(argv, "clean") )
+	if ( !has_arg(argv[1], "-?-?v(?:ersion)?") ) // version command
 	{
-		const int r = remove_tree("target");
-		if ( r == 1 )
+		std::cout << VERSION << '\n';
+		goto exit_no_error;
+	} else
+	if ( !std::strcmp(argv[1], "clean") && !std::strcmp(argv[2], "--global") )
+	{
+		get_local_lib_path(clarbe_local_lib_path);
+
+		if ( remove_tree(clarbe_local_lib_path) )
+		{
+			std::cerr << "Something went wrong while cleaning local libraries\n";
+			goto exit_w_error;
+		}
+		goto exit_no_error;
+	} else
+	if ( !std::strcmp(argv[1], "clean") )
+	{
+		if ( remove_tree("target") )
 		{
 			std::cerr << "Something went wrong while cleaning\n";
-			return 1;
+			goto exit_w_error;
 		}
-		return 0;
+		goto exit_no_error;
 	} else
-	if ( !has_arg(argv, "check") )
+	if ( !std::strcmp(argv[1], "check") )
 	{
 		// check code for errors and warnings
-		return 0;
+		// also for integrity and version of libs
+		goto exit_no_error;
 	} else
-	if ( !has_arg(argv, "run") )
+	if ( !std::strcmp(argv[1], "check") && !std::strcmp(argv[2], "--global") )
+	{
+		// also for integrity and version of local libs
+		goto exit_no_error;
+	} else
+	if ( !std::strcmp(argv[1], "run") )
 	{
 		if ( create_dir("target") == 1 )
 		{
 			// run existing code
 		} else
 		{
-			// compile code
+			goto compile_code;
 		}
 		
-		return 0;
+		goto exit_no_error;
 	} else
-	if ( !has_arg(argv, "build") || !has_arg(argv, "compile") )
+	if ( !std::strcmp(argv[1], "build") || !std::strcmp(argv[1], "compile") )
 	{
+compile_code:
 		if ( !path_exists("clarbe.toml") )
 		{
 			std::cerr << "No project file detected.\n";
-			return 1;
+			goto exit_w_error;
 		}
 		
 		create_dir("target");
-		return 0;
+		goto exit_no_error;
 	} else
-	if ( !has_arg(argv, "new") )
+	if ( !std::strcmp(argv[1], "new") )
 	{
 		if ( argc < 3 )
 		{
 			std::cerr << "No project name defined.\nuse \"clarbe new <project_name>\"\n";
-			return 1;
+			goto exit_w_error;
 		} else
 		if ( create_dir(argv[2]) == 1 )
 		{
 			std::cerr << "Directory already exists.\n";
-			return 1;
+			goto exit_w_error;
 		}
 		
 		generate_new_content(argv[2]);
-		return 0;
+		goto exit_no_error;
 	} else
-	if ( !has_arg(argv, "init") )
+	if ( !std::strcmp(argv[1], "init") )
 	{
 		if ( argc < 3 )
 		{
 			std::cerr << "No folder name defined.\nuse \"clarbe init <folder>\"\n";
-			return 1;
+			goto exit_w_error;
 		} else
 		if ( create_dir(argv[2]) != 1 )
 		{
 			std::cerr << "Directory does not exist.\n";
 			remove_tree(argv[2]);
-			return 1;
+			goto exit_w_error;
 		}
 
 		generate_new_content(argv[2]);
-		return 0;
+		goto exit_no_error;
 	} else
-	if ( !has_arg(argv, "add") )
+	if ( !std::strcmp(argv[1], "add") && !has_arg<128>(argv, "--global") )
+	{
+		get_local_lib_path(clarbe_local_lib_path);
+
+		if ( argc < 4 )
+		{
+			std::cerr << "Not enough arguments.\ndefine the <creator>/<dependency-name>\n";
+			goto exit_w_error;
+		} else
+		if ( argc > 4 )
+		{
+			std::cerr << "too many arguments.\n";
+			goto exit_w_error;
+		}
+
+		goto exit_no_error;
+	} else
+	if ( !std::strcmp(argv[1], "remove") && !has_arg<128>(argv, "--global") )
+	{
+		get_local_lib_path(clarbe_local_lib_path);
+
+		if ( argc < 4 )
+		{
+			std::cerr << "Not enough arguments.\ndefine the <creator>/<dependency-name>\"\n";
+			goto exit_w_error;
+		} else
+		if ( argc > 4 )
+		{
+			std::cerr << "too many arguments.\n";
+			goto exit_w_error;
+		}
+
+		goto exit_no_error;
+	} else
+	if ( !std::strcmp(argv[1], "add") )
 	{
 		if ( argc < 3 )
 		{
-			std::cerr << "Not enough arguments.\nuse \"clarbe add <dependency>\"\n";
-			return 1;
+			std::cerr << "Not enough arguments.\ndefine the <creator>/<dependency-name>\n";
+			goto exit_w_error;
+		} else
+		if ( argc > 3 )
+		{
+			std::cerr << "too many arguments.\n";
+			goto exit_w_error;
 		} else
 		if ( !path_exists("clarbe.toml") )
 		{
 			std::cerr << "Config file not found.\n";
-			return 1;
+			goto exit_w_error;
 		}
 
-		return 0;
+		goto exit_no_error;
 	} else
-	if ( !has_arg(argv, "remove") )
+	if ( !std::strcmp(argv[1], "remove") )
 	{
 		if ( argc < 3 )
 		{
-			std::cerr << "Not enough arguments.\nuse \"clarbe add <dependency>\"\n";
-			return 1;
+			std::cerr << "Not enough arguments.\ndefine the <creator>/<dependency-name>\"\n";
+			goto exit_w_error;
+		} else
+		if ( argc > 3 )
+		{
+			std::cerr << "too many arguments.\n";
+			goto exit_w_error;
 		} else
 		if ( !path_exists("clarbe.toml") )
 		{
 			std::cerr << "Config file not found.\n";
-			return 1;
+			goto exit_w_error;
 		}
 
-		return 0;
+		goto exit_no_error;
 	} else
-	if ( !has_arg(argv, "config") )
+	if ( !std::strcmp(argv[1], "config") )
 	{
 		if ( argc < 4 )
 		{
 			std::cerr << "Not enough arguments provided.\n"
 								<< "use \"clarbe config <configuration> [values]\"\n";
-			return 1;
+			goto exit_w_error;
 		} else
 		if ( !path_exists("clarbe.toml") )
 		{
 			std::cerr << "Config file not found.\n";
-			return 1;
+			goto exit_w_error;
 		}
 
-		return 0;
+		goto exit_no_error;
 	}
 
 	std::cerr << "No valid arguments provided, try '-h' or '--help'\n";
+	goto exit_no_error;
+exit_no_error:
+  free(clarbe_env);
 	return 0;
+exit_w_error:
+  free(clarbe_env);
+	return 1;
 }

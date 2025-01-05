@@ -1,4 +1,5 @@
-#include "procedures.hpp"
+#include "compiler/procedures.hpp"
+#include "curl/curl.h"
 #include "args.hpp"
 #include <iostream>
 
@@ -43,15 +44,15 @@ int compile_all( char** flags )
   int (*opt_level)();
   
   opt_level = &opt::O0;
-  if ( !has_arg(flags, "-?-(?:O=?|optimization=)0") ) // O0
+  if ( !has_arg<128>(flags, "-?-(?:O=?|[Oo]ptimization=)0") ) // O0
   {
     opt_level = &opt::O0;
   } else
-  if ( !has_arg(flags, "-?-(?:O=?|optimization=)1") ) // O1
+  if ( !has_arg<128>(flags, "-?-(?:O=?|[Oo]ptimization=)1") ) // O1
   {
     opt_level = &opt::O1;
   } else
-  if ( !has_arg(flags, "-?-(?:O=?|optimization=)2") ) // O2
+  if ( !has_arg<128>(flags, "-?-(?:O=?|[Oo]ptimization=)2") ) // O2
   {
     opt_level = &opt::O2;
   } else

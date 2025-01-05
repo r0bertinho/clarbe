@@ -6,14 +6,16 @@ const char HELP_MSG[] =
 "\n"
 "clarbe new <project-name>\n"
 "     | init <folder-name>\n"
-"     | add <dependency-name>\n"
-"     | remove <dependency-name>\n"
-"     | config <configuration> [values]\n"
+"     | add <creator>/<dependency-name>\n"
+"     | remove <creator>/<dependency-name>\n"
+"     | config <placement> <configuration> [values]\n"
 "     | build\n"
 "     | help\n"
 "     | clean\n"
 "     | check\n"
 "     | run\n"
 "--------------------------------\n";
+
+const char VERSION[] = "0.1.0";
 
 #endif
