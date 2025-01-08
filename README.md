@@ -10,4 +10,5 @@ Of course this compiler doesn't follow the full C standard, since it's made by a
 
 ## Dependencies
  - curl
- - tomlplusplus
+ - toml++
+ - rapidjson

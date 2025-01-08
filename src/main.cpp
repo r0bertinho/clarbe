@@ -128,7 +128,7 @@ compile_code:
 		generate_new_content(argv[2]);
 		goto exit_no_error;
 	} else
-	if ( !std::strcmp(argv[1], "add") && !has_arg<128>(argv, "--global") )
+	if ( !std::strcmp(argv[1], "add") && !has_arg(argv, "--global") )
 	{
 		get_local_lib_path(clarbe_local_lib_path);
 
@@ -145,7 +145,7 @@ compile_code:
 
 		goto exit_no_error;
 	} else
-	if ( !std::strcmp(argv[1], "remove") && !has_arg<128>(argv, "--global") )
+	if ( !std::strcmp(argv[1], "remove") && !has_arg(argv, "--global") )
 	{
 		get_local_lib_path(clarbe_local_lib_path);
 

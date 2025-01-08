@@ -1,4 +1,5 @@
 # Workspace
+private/
 .vscode/
 build/
 obj/
