@@ -1,5 +1,4 @@
 CXX="clang++"
-CC="clang"
 FLAGS="-fpermissive -v"
 FINAL="compiler"
 
