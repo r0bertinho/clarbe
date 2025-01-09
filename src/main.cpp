@@ -8,7 +8,7 @@
 
 int main( int argc, char **argv )
 {
-	#ifdef _WIN32
+#ifdef _WIN32
 	if ( !_dupenv_s(&clarbe_env, &clarbe_env_s, "CLARBE_HOME") && clarbe_env != nullptr )
   { // no error
   } else
@@ -16,16 +16,12 @@ int main( int argc, char **argv )
 		std::cout << "\'CLARBE_HOME\' environment variable not defined. closing...\n";
 		goto exit_w_error;
 	}
-	#endif
+#endif
 
 /* --------------------
 		Error cases
    -------------------- */
-	if ( clarbe_env == NULL) // Check if environment variable exists
-	{
-		std::cerr << "No working directory defined for clarbe.\n";
-		goto exit_w_error;
-	}
+	
 
 /* --------------------
 		Commands
