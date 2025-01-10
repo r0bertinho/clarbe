@@ -11,10 +11,6 @@ I were tired of reading incredible C/C++ committee proposal papers which were no
 the project's compromised of two parts, the compiler and project manager.
 hence the compiler is not yet functional, the project manager will be a wrapper around other compilers such as clang or gcc
 
-## Information
-
-Of course this compiler doesn't follow the full C standard, since it's made by a single dev ;-;
-
 ## Dependencies
  - curl
  - toml++
