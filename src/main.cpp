@@ -72,6 +72,7 @@ int main(int argc, char **argv) {
     }
 
     create_dir("target");
+    create_dir("target/object");
     goto exit_no_error;
   } else if (!std::strcmp(argv[1], "new")) {
     if (argc < 3) {
@@ -144,6 +145,17 @@ int main(int argc, char **argv) {
       goto exit_w_error;
     } else if (argc > 3) {
       std::cerr << "too many arguments.\n";
+      goto exit_w_error;
+    } else if (!path_exists("clarbe.toml")) {
+      std::cerr << "Config file not found.\n";
+      goto exit_w_error;
+    }
+
+    goto exit_no_error;
+  } else if (!std::strcmp(argv[1], "config") && !has_arg(argv, "--global")) {
+    if (argc < 4) {
+      std::cerr << "Not enough arguments provided.\n"
+                << "use \"clarbe config <configuration> [values]\"\n";
       goto exit_w_error;
     } else if (!path_exists("clarbe.toml")) {
       std::cerr << "Config file not found.\n";

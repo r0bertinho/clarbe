@@ -3,12 +3,13 @@
 
 ### Community: https://discord.gg/Twhv4KU3qf
 
-Is a cargo-like package manager and compiler for the C programming language.
+Is a compiler / cargo-like package and project manager for the C programming language.
 I were tired of reading incredible C/C++ committee proposal papers which were not accepted in the language, so I created this manager for the lovers of C to try adding things they'd love to see in the language.
 
 ## Overview
 
-the project's compromised of two parts, the compiler and file manager.
+the project's compromised of two parts, the compiler and project manager.
+hence the compiler is not yet functional, the project manager will be a wrapper around other compilers such as clang or gcc
 
 ## Information
 
@@ -25,4 +26,5 @@ Download the zipped source code, unzip and in the directory run in git bash term
 This will create a dir 'build' with three inside:
  - from 'build/compiler' drag 'compiler.exe' to 'CLARBE_HOME/bin'
  - from 'build/release/Release' drag 'clarbe.exe' to 'CLARBE_HOME/bin'
+Inside 'CLARBE_HOME' create a file 'config.toml' and configure based on the wiki.
 now run in terminal ```clarbe -v```

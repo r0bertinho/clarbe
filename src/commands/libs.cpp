@@ -22,6 +22,8 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, char **userp) {
   return totalSize;
 }
 
+/* for later
+
 // Function to get the latest tag from a GitHub repository
 void get_latest_tag(char *out, const char *libname) {
   // Split the input string into owner and repo
@@ -106,6 +108,8 @@ void get_latest_tag(char *out, const char *libname) {
   realloc(out, sizeof(result));
   strcpy(out, result);
 }
+
+*/
 
 int install_to_global_libs(char *lib) { return 0; }
 

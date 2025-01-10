@@ -13,7 +13,7 @@ int add_lib_to_toml(char *libname) {
 
   char *most_recent;
 
-  get_latest_tag(most_recent, libname);
+  // get_latest_tag(most_recent, libname);
 
   config_file.insert_or_assign("libraries",
                                toml::table{{libname, most_recent}});
