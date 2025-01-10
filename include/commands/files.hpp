@@ -6,4 +6,6 @@ int create_dir(const char path[]);
 int generate_new_content(const char folder_path[]);
 bool path_exists(const char path_name[]);
 
+#include "files.tpp"
+
 #endif

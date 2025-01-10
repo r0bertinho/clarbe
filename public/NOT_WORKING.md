@@ -1,6 +1,5 @@
 ### High priority (to be fixed until next patch release)
- - error LNK2019 in the 'libs' files, relating to the definition of the function 'get_latest_tag'
- - error LNK1120 of unresolved externals
+ - multiple definitions of the functions defined in args.hpp / args.tpp
 
 ### Medium priority (to be fixed until next minor release)
  - 

@@ -1,24 +1,22 @@
-#include "commands/conf.hpp"
-
-#include <cstdlib>
 #include <fstream>
 #include <regex>
 #include <string>
 
-#include "commands/libs.hpp"
+#include "conf.hpp"
+#include "libs.hpp"
 #include "toml++/toml.hpp"
 
 int add_lib_to_toml(char *libname) {
   auto config_file = toml::parse_file("clarbe.toml");
 
-  char *most_recent;
+  char *most_recent = new char[1];
 
   // get_latest_tag(most_recent, libname);
 
   config_file.insert_or_assign("libraries",
                                toml::table{{libname, most_recent}});
 
-  free(most_recent);
+  delete[] most_recent;
 
   fprintf(stdout, "added library \'%s\' to clarbe.toml\n", libname);
 

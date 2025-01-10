@@ -23,8 +23,7 @@ Of course this compiler doesn't follow the full C standard, since it's made by a
 ## Installation
 Create a environment variable 'CLARBE_HOME' and add 'CLARBE_HOME/bin' to path.
 Download the zipped source code, unzip and in the directory run in git bash terminal ```bash build.sh```.
-This will create a dir 'build' with three inside:
- - from 'build/compiler' drag 'compiler.exe' to 'CLARBE_HOME/bin'
- - from 'build/release/Release' drag 'clarbe.exe' to 'CLARBE_HOME/bin'
+This will create a dir 'build':
+ - from 'build' drag 'clarbe.exe' to 'CLARBE_HOME/bin'
 Inside 'CLARBE_HOME' create a file 'config.toml' and configure based on the wiki.
 now run in terminal ```clarbe -v```

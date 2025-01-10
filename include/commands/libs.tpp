@@ -1,11 +1,11 @@
-#include "commands/libs.hpp"
-
-#include <cstring>
 #include <iostream>
 
 #include "curl/curl.h"
+#include "libs.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/error/en.h"
+
+/* for later
 
 // Callback function to write the response data
 size_t write_callback(void *contents, size_t size, size_t nmemb, char **userp) {
@@ -22,7 +22,6 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, char **userp) {
   return totalSize;
 }
 
-/* for later
 
 // Function to get the latest tag from a GitHub repository
 void get_latest_tag(char *out, const char *libname) {
