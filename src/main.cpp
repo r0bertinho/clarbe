@@ -1,11 +1,14 @@
 #include <cstring>
 #include <iostream>
+#include <filesystem>
 
 #include "args.hpp"
 #include "commands/files.hpp"
 #include "consts.hpp"
 #include "messages.h"
 #include "toml++/toml.hpp"
+
+namespace fs = std::filesystem;
 
 int main(int argc, char** argv) {
   if (clarbe_env != nullptr) {  // no error
@@ -20,7 +23,7 @@ int main(int argc, char** argv) {
   strcpy(env_toml_path, clarbe_env);
   strcat(env_toml_path, "/config.toml");
 
-  auto config_file = toml::parse_file(env_toml_path);
+  auto env_config_file = toml::parse_file(env_toml_path);
 
   delete[] env_toml_path;
 
@@ -90,10 +93,70 @@ int main(int argc, char** argv) {
       return 1;
     }
 
+    auto local_config = toml::parse_file("clarbe.toml");
+
     create_dir("target");
     create_dir("target/object");
+    create_dir("target/bin");
 
-    // ------ //
+    std::optional<std::string> compiler = env_config_file["build"]["compiler"].value<std::string>();
+    
+    if (!compiler) {
+      std::cerr << "Compiler not found or not a string.\n";
+      free(clarbe_env);
+      return 1;
+    }
+
+    std::string include_arg("");
+
+    if (auto inc_arr = local_config["local"]["includes"].as_array()) {
+      for (const auto & include_dir : *inc_arr) {
+        if (auto dir = include_dir.value<std::string>()) {
+          include_arg += "-I \"" + *dir + "\" ";
+        } else {
+          std::cerr << "Include directory is not a string.\n";
+        }
+      }
+    } else {
+      std::cerr << "Includes not found or not an array.\n";
+      return 1;
+    }
+
+    std::optional<std::string> pstd;
+
+    if ((pstd = local_config["package"]["std"].value<std::string>())) {
+      std::cout << "Compiling with standard " << *pstd << ".\n";
+    } else {
+      std::cerr << "C standard to use not defined correctly, defaulting to c17.\n";
+      *pstd = "c17";
+    }
+
+    if (auto src_arr = local_config["local"]["sources"].as_array()) {
+      for (const auto & source_dir : *src_arr) {
+        if (auto dir = source_dir.value<std::string>()) {
+          if (fs::exists(*dir) && fs::is_directory(*dir)) {
+            for (const auto & source_file : fs::directory_iterator(*dir)) {
+              std::string command(*compiler + " --std=" + *pstd + " " + include_arg + "-o target/object/" + source_file.path().filename().string() + ".o -c " + *dir + "/" + source_file.path().filename().string());
+              std::system(command.c_str());
+            }
+          } else {
+            std::cerr << "Directory does not exist: " << *dir << '\n';
+          }
+        } else {
+          std::cerr << "Source directory is not a string.\n";
+        }
+      }
+    } else {
+      std::cerr << "Sources not found or not an array.\n";
+      return 1;
+    }
+
+    if (std::optional<std::string> exe_name = local_config["package"]["name"].value<std::string>()) {
+      std::system(std::string(*compiler + " -o \"target/bin/" + *exe_name + "\" \"target/object/*.*.o\"").c_str());
+    } else {
+      std::cerr << "Name of the package not defined or not usable.\n";
+      return 1;
+    }
 
     free(clarbe_env);
     return 0;

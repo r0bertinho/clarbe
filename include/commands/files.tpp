@@ -84,7 +84,7 @@ int generate_new_content(const char* folder_path) {
               << "build_file = \"false\"" << '\n'
               << '\n'
               << "[dependencies]" << '\n'
-              << "stdio = \"latest\"" << '\0';
+              << "stdio = \"latest\"" << '\n';
 
   config_file.flush();
   config_file.close();
@@ -109,7 +109,7 @@ int generate_new_content(const char* folder_path) {
               << "int main(int argc, char **argv) {" << '\n'
               << "  fprintf(stdout, \"Hello world!\");" << '\n'
               << "  return 0;" << '\n'
-              << "}" << '\0';
+              << "}" << '\n';
 
   config_file.flush();
   source_file.close();
