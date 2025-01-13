@@ -1,17 +1,15 @@
+#include "args.hpp"
+
 #include <cstring>
 #include <iostream>
 #include <regex>
 
-#include "args.hpp"
-
 /*
- * has_arg(argv, arg_r)
- *
  * Checks if a specific argument exists in the provided input.
  * Forgiving argument recognition.
  */
 int has_arg(char *argv_, const char *arg_r) {
-  std::regex regex(arg_r);
+  std::regex regex(arg_r, std::regex_constants::optimize);
 
   try {
     if (std::regex_search(argv_, regex)) {
@@ -28,7 +26,7 @@ int has_arg(char **argv_, const char *arg_r) {
   char *string = nullptr;
   altoc(string, argv_);
 
-  std::regex regex(arg_r);
+  std::regex regex(arg_r, std::regex_constants::optimize);
 
   try {
     if (std::regex_search(string, regex)) {
@@ -49,10 +47,10 @@ void altoc(char out[], char **argv) {
   size_t fs = 0;
 
   for (int n = 0; *(argv + n) != NULL; n++) {
-    fs += sizeof(*(argv + n)) + 1;
+    fs += strlen(*(argv + n)) + 1;
   }
 
-  char *full_str = new char[fs];
+  char *full_str = (char *)calloc(fs, sizeof(char));
 
   int local = 0;
 
@@ -70,7 +68,7 @@ void altoc(char out[], char **argv) {
     }
   }
 
-  realloc(out, sizeof(full_str));
+  out = (char *)realloc(out, strlen(full_str) * sizeof(char));
   strcpy(out, full_str);
-  delete[] full_str;
+  free(full_str);
 }

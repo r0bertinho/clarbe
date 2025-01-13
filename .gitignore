@@ -1,10 +1,14 @@
 # Workspace
 private/
 .vscode/
+private-test/
 build/
 obj/
+third-party/
 
 # Other
+valgrind-out.txt
+build-arch.sh
 desktop.ini
 
 # Prerequisites

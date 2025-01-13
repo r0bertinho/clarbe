@@ -4,26 +4,26 @@
 
 #include "conf.hpp"
 #include "libs.hpp"
-#include "toml++/toml.hpp"
+#include "toml.hpp"
 
-int add_lib_to_toml(char *libname) {
+int add_lib_to_toml(const char *libname) {
   auto config_file = toml::parse_file("clarbe.toml");
 
-  char *most_recent = new char[1];
+  char *most_recent = nullptr;
 
-  // get_latest_tag(most_recent, libname);
+  get_latest_tag(most_recent, libname);
 
   config_file.insert_or_assign("libraries",
                                toml::table{{libname, most_recent}});
 
-  delete[] most_recent;
+  free(most_recent);
 
   fprintf(stdout, "added library \'%s\' to clarbe.toml\n", libname);
 
   return 0;
 }
 
-int add_lib_to_toml(char *libname, char *version) {
+int add_lib_to_toml(const char *libname, char *version) {
   auto config_file = toml::parse_file("clarbe.toml");
 
   config_file.insert_or_assign("libraries", toml::table{{libname, version}});
@@ -33,7 +33,7 @@ int add_lib_to_toml(char *libname, char *version) {
   return 0;
 }
 
-int take_lib_from_toml(char *libname) {
+int take_lib_from_toml(const char *libname) {
   std::regex regex(std::string(libname) + " = .+\n");
 
   std::fstream config_file("clarbe.toml");

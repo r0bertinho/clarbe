@@ -1,11 +1,10 @@
 #include <iostream>
+#include <cstring>
 
 #include "curl/curl.h"
 #include "libs.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/error/en.h"
-
-/* for later
 
 // Callback function to write the response data
 size_t write_callback(void *contents, size_t size, size_t nmemb, char **userp) {
@@ -13,7 +12,7 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, char **userp) {
   // Reallocate memory to hold the new data
   *userp = (char *)realloc(*userp, totalSize + 1);
   if (*userp == NULL) {
-    std::cerr << "Failed to allocate memory." << std::endl;
+    std::cerr << "Failed to allocate memory.\n";
     return 0;  // Return 0 to indicate failure
   }
 
@@ -22,21 +21,26 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, char **userp) {
   return totalSize;
 }
 
-
 // Function to get the latest tag from a GitHub repository
 void get_latest_tag(char *out, const char *libname) {
   // Split the input string into owner and repo
   char *owner = nullptr;
   char *repo = nullptr;
-  char *libname_copy =
-      strdup(libname);  // Duplicate the input string for manipulation
+  char *libname_copy = nullptr;
+
+  if (libname == NULL) {
+    std::cerr << "library name is NULL.\n";
+    return;
+  }
+  
+  libname_copy = strdup(libname);  // Duplicate the input string for manipulation
 
   char *pos = strchr(libname_copy, '/');
   if (pos == NULL) {
-    std::cerr << "Invalid format. Use <owner>/<repo>." << std::endl;
+    std::cerr << "Invalid format. Use <owner>/<repo>.\n";
     free(libname_copy);
 
-    realloc(out, sizeof("N/A"));
+    out = (char *)malloc(strlen("N/A") * sizeof(char));
     strcpy(out, "N/A");
     return;
   }
@@ -64,12 +68,12 @@ void get_latest_tag(char *out, const char *libname) {
     res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
       std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res)
-                << std::endl;
+                << '\n';
       curl_easy_cleanup(curl);
       curl_global_cleanup();
       free(libname_copy);
 
-      realloc(out, sizeof("N/A"));
+      out = (char *)malloc(strlen("N/A") * sizeof(char));
       strcpy(out, "N/A");
       return;
     }
@@ -84,11 +88,12 @@ void get_latest_tag(char *out, const char *libname) {
   if (document.Parse(readBuffer).HasParseError()) {
     std::cerr << "Failed to parse JSON: "
               << rapidjson::GetParseError_En(document.GetParseError())
-              << std::endl;
+              << '\n';
     free(readBuffer);
     free(libname_copy);
 
-    realloc(out, sizeof("N/A"));
+    free(out);
+    out = (char *)malloc(strlen("N/A") * sizeof(char));
     strcpy(out, "N/A");
     return;
   }
@@ -104,11 +109,10 @@ void get_latest_tag(char *out, const char *libname) {
   free(readBuffer);
   free(libname_copy);
 
-  realloc(out, sizeof(result));
+  free(out);
+  out = (char *)malloc(sizeof(result) * sizeof(char));
   strcpy(out, result);
 }
-
-*/
 
 int install_to_global_libs(char *lib) { return 0; }
 

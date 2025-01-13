@@ -45,8 +45,8 @@ int create_dir(const char path[]) {
  * if there was an error opening files.
  */
 int generate_new_content(const char* folder_path) {
-  char* config_file_path =
-      new char[sizeof(folder_path) + sizeof(".//clarbe.toml")];
+  char* config_file_path = (char*)calloc(
+      sizeof(folder_path) + sizeof(".//clarbe.toml"), sizeof(char));
   strcpy(config_file_path, "./");
   strcat(config_file_path, folder_path);
   strcat(config_file_path, "/clarbe.toml");
@@ -58,12 +58,12 @@ int generate_new_content(const char* folder_path) {
   strcat(config_file_path, "/src");
   // create source directory before freeing
   if (create_dir(config_file_path)) {
-    delete[] config_file_path;
+    free(config_file_path);
     config_file.close();
     return 1;
   }
 
-  delete[] config_file_path;
+  free(config_file_path);
 
   if (!config_file.is_open()) {
     return 2;
@@ -89,8 +89,8 @@ int generate_new_content(const char* folder_path) {
   config_file.flush();
   config_file.close();
 
-  char* source_file_path =
-      new char[sizeof(folder_path) + sizeof(".//src/main.c")];
+  char* source_file_path = (char*)calloc(
+      sizeof(folder_path) + sizeof(".//src/main.c"), sizeof(char));
   strcpy(source_file_path, "./");
   strcat(source_file_path, folder_path);
   strcat(source_file_path, "/src/main.c");
@@ -98,7 +98,7 @@ int generate_new_content(const char* folder_path) {
   std::fstream source_file;
   source_file.open(source_file_path, std::fstream::out);
 
-  delete[] source_file_path;
+  free(source_file_path);
 
   if (!source_file.is_open()) {
     return 3;
@@ -115,17 +115,17 @@ int generate_new_content(const char* folder_path) {
   source_file.close();
 
   char* include_folder_path =
-      new char[sizeof(folder_path) + sizeof(".//include")];
+      (char*)calloc(sizeof(folder_path) + sizeof(".//include"), sizeof(char));
   strcpy(include_folder_path, "./");
   strcat(include_folder_path, folder_path);
   strcat(include_folder_path, "/include");
 
   if (create_dir(include_folder_path)) {
-    delete[] include_folder_path;
+    free(include_folder_path);
     return 4;
   }
 
-  delete[] include_folder_path;
+  free(include_folder_path);
   return 0;
 }
 

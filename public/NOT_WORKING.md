@@ -1,5 +1,5 @@
 ### High priority (to be fixed until next patch release)
- - multiple definitions of the functions defined in args.hpp / args.tpp
+ - memory leaks/insecurities in conf.tpp and libs.tpp
 
 ### Medium priority (to be fixed until next minor release)
  - 

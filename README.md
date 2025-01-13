@@ -1,7 +1,7 @@
 # C.L.A.R.B.E.
 ###### Or: C Language Assistant for Running and Building Ecosystems.
 
-### Community: https://discord.gg/Twhv4KU3qf
+### Community: <a href="https://discord.gg/Twhv4KU3qf"><img alt="Discord" src="https://img.shields.io/discord/1326716525461245962"></a>
 
 Is a compiler / cargo-like package and project manager for the C programming language.
 I were tired of reading incredible C/C++ committee proposal papers which were not accepted in the language, so I created this manager for the lovers of C to try adding things they'd love to see in the language.
