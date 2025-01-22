@@ -3,8 +3,9 @@
 #include <iostream>
 
 #include "args.hpp"
-#include "commands/files.hpp"
 #include "commands/conf.hpp"
+#include "commands/files.hpp"
+#include "commands/libs.hpp"
 #include "consts.hpp"
 #include "messages.h"
 #include "toml.hpp"
@@ -24,11 +25,11 @@ int main(int argc, char** argv) {
   strcpy(env_toml_path, clarbe_env);
   strcat(env_toml_path, "/config.toml");
 
-  toml::v3::ex::parse_result env_config_file;
+  toml::parse_result env_config_file;
 
   try {
     env_config_file = toml::parse_file(env_toml_path);
-  } catch(...) {
+  } catch (...) {
     std::cout
         << "An error occurred while reading \'CLARBE_HOME/config.toml\'\n";
     free(env_toml_path);
@@ -107,6 +108,9 @@ int main(int argc, char** argv) {
     create_dir("target");
     create_dir("target/object");
     create_dir("target/bin");
+    create_dir((std::string(clarbe_env) + "/libs").c_str());
+
+    install_libraries(local_config);
 
     std::optional<std::string> compiler =
         env_config_file["build"]["compiler"].value<std::string>();
@@ -147,8 +151,8 @@ int main(int argc, char** argv) {
         if (auto dir = source_dir.value<std::string>()) {
           if (fs::exists(*dir) && fs::is_directory(*dir)) {
             for (const auto& source_file : fs::directory_iterator(*dir)) {
-              std::string command(*compiler + " --std=" + *pstd + " " +
-                                  include_arg + "-o target/object/" +
+              std::string command(*compiler + "-stdlib=libc -std=" + *pstd +
+                                  " " + include_arg + "-o target/object/" +
                                   source_file.path().filename().string() +
                                   ".o -c " + *dir + "/" +
                                   source_file.path().filename().string());
@@ -207,12 +211,13 @@ int main(int argc, char** argv) {
     generate_new_content(argv[2]);
 
     return 0;
-  } else if (!std::strcmp(argv[1], "add") && !std::strcmp(argv[2], "--global")) {
+  } else if (!std::strcmp(argv[1], "add") &&
+             !std::strcmp(argv[2], "--global")) {
     get_local_lib_path(clarbe_local_lib_path);
 
     if (argc < 4) {
       std::cerr << "Not enough arguments.\ndefine the "
-                   "<creator>/<dependency-name>\n";
+                   "<creator>_<name>\n";
       free(clarbe_local_lib_path);
 
       return 1;
@@ -226,12 +231,13 @@ int main(int argc, char** argv) {
     free(clarbe_local_lib_path);
 
     return 0;
-  } else if (!std::strcmp(argv[1], "remove") && !std::strcmp(argv[2], "--global")) {
+  } else if (!std::strcmp(argv[1], "remove") &&
+             !std::strcmp(argv[2], "--global")) {
     get_local_lib_path(clarbe_local_lib_path);
 
     if (argc < 4) {
       std::cerr << "Not enough arguments.\ndefine the "
-                   "<creator>/<dependency-name>\"\n";
+                   "<creator>_<name>\"\n";
       free(clarbe_local_lib_path);
 
       return 1;
@@ -246,7 +252,7 @@ int main(int argc, char** argv) {
   } else if (!std::strcmp(argv[1], "add")) {
     if (argc < 3) {
       std::cerr << "Not enough arguments.\ndefine the "
-                   "<creator>/<dependency-name>\n";
+                   "<creator>_<name>\n";
 
       return 1;
     } else if (argc > 3) {
@@ -265,7 +271,7 @@ int main(int argc, char** argv) {
   } else if (!std::strcmp(argv[1], "remove")) {
     if (argc < 3) {
       std::cerr << "Not enough arguments.\ndefine the "
-                   "<creator>/<dependency-name>\"\n";
+                   "<creator>_<name>\"\n";
 
       return 1;
     } else if (argc > 3) {

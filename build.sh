@@ -1,14 +1,14 @@
 CXX="/d/msys64/mingw64/bin/clang++.exe"
-CXXFLAGS="--std=c++2a -O0 -g -v -Wall -Wextra -fpermissive"
+CXXFLAGS="-std=c++26 -stdlib=libc++ -O0 -g -v -Wall -Wextra -fpermissive -pedantic-errors"
 LIBS="-lcurl"
 INC="-I ../include -I ../third-party/tomlplusplus -I ../third-party/rapidjson/include -I ../third-party/curl/include"
 
 mkdir -p third-party
 cd third-party
 
-git clone "https://github.com/marzer/tomlplusplus.git"
-git clone "https://github.com/Tencent/rapidjson.git"
-git clone "https://github.com/curl/curl.git"
+git clone "https://github.com/marzer/tomlplusplus.git" && git -C tomlplusplus pull "https://github.com/marzer/tomlplusplus.git"
+git clone "https://github.com/Tencent/rapidjson.git" && git -C rapidjson pull "https://github.com/Tencent/rapidjson.git"
+git clone "https://github.com/curl/curl.git" && git -C curl pull "https://github.com/curl/curl.git"
 
 cd ..
 mkdir -p build
