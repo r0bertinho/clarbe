@@ -8,7 +8,7 @@ command="clang-format -i -style=Google "
 search_dir="${1:-.}"
 
 # List of directories to exclude (space-separated)
-exclude_dirs=("build" "public" "private" "third-party" ".github" ".vscode")  # Add directories to exclude here
+exclude_dirs=("build" "public" "private" "third-party" ".github" ".vscode" "private-test")  # Add directories to exclude here
 
 # Build the find command with exclusions
 find_command="find \"$search_dir\""

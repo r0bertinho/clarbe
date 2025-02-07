@@ -130,7 +130,7 @@ void get_latest_tag(char *out, const char *libname) {
  * 5: table: Tag not defined;
 */
 int install_libraries(toml::parse_result &local_config) {
-  // Always install in path as %CLARBE_HOME%/libs/"repo-.-user"/"version" 
+  // Always install in path as %CLARBE_HOME%/libs/"repo-.-user"/"version"
 
   if (auto dep_tbl = local_config["libraries"].as_table()) {
     for (auto [key, value] : *dep_tbl) {

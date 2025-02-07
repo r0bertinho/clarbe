@@ -7,6 +7,7 @@ obj/
 third-party/
 
 # Other
+*.tmp.*
 valgrind-out.txt
 build-arch.sh
 desktop.ini

@@ -1,5 +1,5 @@
 CXX="/d/msys64/mingw64/bin/clang++.exe"
-CXXFLAGS="-std=c++26 -stdlib=libc++ -O0 -g -v -Wall -Wextra -fpermissive -pedantic-errors"
+CXXFLAGS="-std=c++26 -stdlib=libc++ -O0 -g -v -Wall -Wextra -fpermissive"
 LIBS="-lcurl"
 INC="-I ../include -I ../third-party/tomlplusplus -I ../third-party/rapidjson/include -I ../third-party/curl/include"
 
