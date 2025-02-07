@@ -18,8 +18,6 @@ TEST_CASE("args.hpp/has_arg", "[int has_arg(char*, char*)]")
   REQUIRE(has_arg(strdup("clarbe help build"), strdup("-?-?h(?:elp)? +build")) == 0);
 }
 
-/*
-
 TEST_CASE("args.hpp/has_arg", "[int has_arg(char**, char*)]")
 {
   char* arr1[] = {strdup("clarbe"), strdup("build"), strdup("-O3")};
@@ -119,8 +117,8 @@ TEST_CASE("libs.hpp/write_callback", "[int write_callback(void*, size_t, size_t,
 {
   // Later
 }
-*/
+
 int main(int argc, char** argv) {
   const int retval = Catch::Session().run(argc, argv);
-  return 0;
+  return retval;
 }

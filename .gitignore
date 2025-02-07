@@ -3,6 +3,7 @@ private/
 .vscode/
 private-test/
 build/
+tests/build
 obj/
 third-party/
 
