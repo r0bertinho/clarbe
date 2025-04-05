@@ -16,9 +16,13 @@ hence the compiler is not yet functional, the project manager will be a wrapper 
  - toml++
  - rapidjson
 
+## Build dependencies
+ - C/C++ compiler(gcc, clang, etc...)
+ - git
+
 ## Installation
 Create a environment variable 'CLARBE_HOME' and add 'CLARBE_HOME/bin' to path.
-Download the zipped source code, unzip and in the directory run in git bash terminal ```bash build.sh```.
+Download the zipped source code, unzip and in the directory run in bash terminal ```bash scripts/build.sh```.
 This will create a dir 'build':
  - from 'build' drag 'clarbe.exe' to 'CLARBE_HOME/bin'
 Inside 'CLARBE_HOME' create a file 'config.toml' and configure based on the wiki.

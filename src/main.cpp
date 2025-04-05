@@ -87,19 +87,26 @@ int main(int argc, char** argv) {
 
     return 0;
   } else if (!std::strcmp(argv[1], "run")) {
-    if (create_dir("target") == 1) {
-      // run existing code
-    } else {
-      goto compile_code;
+    if (!path_exists("target/bin")) {
+      std::cerr << "No executable directory detected.\n";
+      return 1;
+    } else if (!path_exists("clarbe.toml")) {
+      std::cerr << "No project file detected.\n";
+      return 1;
     }
+
+    auto local_config = toml::parse_file("clarbe.toml");
+
+    std::string cmd("target/bin/");
+    cmd += *(local_config["package"]["name"].value<std::string>()) + ".exe";
+
+    std::system(cmd.c_str());
 
     return 0;
   } else if (!std::strcmp(argv[1], "build") ||
              !std::strcmp(argv[1], "compile")) {
-  compile_code:
     if (!path_exists("clarbe.toml")) {
       std::cerr << "No project file detected.\n";
-
       return 1;
     }
 

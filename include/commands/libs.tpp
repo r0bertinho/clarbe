@@ -119,7 +119,7 @@ void get_latest_tag(char *out, const char *libname) {
 
 /* Installs all given libs in a toml file
  * to %CLARBE_HOME%/libs
- *  
+ *
  * Returns codes:
  * -1: Undefined error;
  * 0: Success;
@@ -128,7 +128,7 @@ void get_latest_tag(char *out, const char *libname) {
  * 3: Lib already exists;
  * 4: Syntax error defining lib;
  * 5: table: Tag not defined;
-*/
+ */
 int install_libraries(toml::parse_result &local_config) {
   // Always install in path as %CLARBE_HOME%/libs/"repo-.-user"/"version"
 
@@ -139,10 +139,10 @@ int install_libraries(toml::parse_result &local_config) {
                   << " with tag: " << value.value_or("invalid") << '\n';
       } else if (value.is_table()) {
         toml::table lib_info = *value.as_table();
-        if (!std::strcmp(lib_info["tag"].value_or("$ERR"), "$ERR"))
-          return 5;
+        if (!std::strcmp(lib_info["tag"].value_or("$ERR"), "$ERR")) return 5;
         std::cout << "Installing " << key
-                  << " with tag: " << lib_info["tag"].value_or("invalid") << '\n';
+                  << " with tag: " << lib_info["tag"].value_or("invalid")
+                  << '\n';
       } else
         return 4;
     }

@@ -1,0 +1,28 @@
+name: Feature Request
+description: Ask for a new feature to be added.
+title: "[Request]: "
+labels: ["enhancement"]
+projects: ["IanSouzaFreire/clarbe"]
+assignees:
+  - Ian
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: information
+    attributes:
+      label: Inform feature
+      description: describe in the best way posssible the feature you want added.
+      placeholder: ex. a cool helicopter
+    validations:
+      required: true
+  - type: textarea
+    id: survey
+    attributes:
+      label: How do you think this would be useful?
+      description: describe how one may use this feature and/or why one may include it.
+      placeholder: ex. it spins
+    validations:
+      required: true
