@@ -1,5 +1,5 @@
 CXX="/d/msys64/mingw64/bin/clang++.exe"
-CXXFLAGS="-std=c++26 -stdlib=libc++ -O0 -g -v -Wall -Wextra -fpermissive"
+CXXFLAGS="-std=c++26 -lstdc++exp -O0 -g"
 LIBS="-lcurl"
 INC="-I ../include -I ../third-party/tomlplusplus -I ../third-party/rapidjson/include -I ../third-party/curl/include"
 
@@ -27,10 +27,21 @@ done
 echo "Building compiler binary:"
 
 # Link all object files to create the final binary
-$CXX -o clarbe.exe *.o $INC $LIBS $CXXFLAGS
+$CXX -o bin/clarbe.exe *.o $INC $LIBS $CXXFLAGS
 
-# Send binary to the clarbe binaries dir
-cp "clarbe.exe" "$CLARBE_HOME/bin"
+mkdir -p cmd
+
+echo "Building commands:"
+
+# Compile each command to it's own dll file
+for src in ../commands/*.cpp; do
+  base=$(basename "$src" .cpp)
+  $CXX -c "$src" -o "cmd/${base}.o" $INC $LIBS $CXXFLAGS
+  $CXX -shared -o "bin/${base}.dll" "cmd/${base}.o" $INC $LIBS $CXXFLAGS
+done
+
+# Send binary directory to the clarbe binaries dir
+cp -a "bin/." "$CLARBE_HOME/bin/"
 
 echo "Ended compiler build procedure"
 

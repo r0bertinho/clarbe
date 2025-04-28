@@ -1,12 +1,13 @@
 #ifndef CONSTS_HPP
 #define CONSTS_HPP
 
-char* clarbe_env = std::getenv("CLARBE_HOME");
+#include <string>
 
-#define get_local_lib_path(varname)                                            \
-  char* varname =                                                              \
-      (char*)calloc(sizeof(clarbe_env) + sizeof("/local_libs"), sizeof(char)); \
-  strcat(varname, clarbe_env);                                                 \
-  strcat(varname, "/local_libs")
+const char* getenv_or(const char* env, const char* err) noexcept {
+  char* tmp;
+  return (tmp = std::getenv(env)) != NULL ? tmp : err;
+}
+
+const std::string clarbe_env(getenv_or("CLARBE_HOME", "null"));
 
 #endif
