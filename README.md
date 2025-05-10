@@ -21,9 +21,6 @@ hence the compiler is not yet functional, the project manager will be a wrapper 
  - git
 
 ## Installation
-Create a environment variable 'CLARBE_HOME' and add 'CLARBE_HOME/bin' to path.
-Download the zipped source code, unzip and in the directory run in bash terminal ```bash scripts/build.sh```.
-This will create a dir 'build':
- - from 'build' drag 'clarbe.exe' to 'CLARBE_HOME/bin'
-Inside 'CLARBE_HOME' create a file 'config.toml' and configure based on the wiki.
-now run in terminal ```clarbe -v```
+- Create a environment variable 'CLARBE_HOME' and add 'CLARBE_HOME/bin' to path
+- Download the zipped source code, unzip and in the directory run in bash terminal ```bash build.sh```
+- now run in terminal ```clarbe version```

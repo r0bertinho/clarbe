@@ -43,6 +43,6 @@ done
 # Send binary directory to the clarbe binaries dir
 cp -a "bin/." "$CLARBE_HOME/bin/"
 
-echo "Ended compiler build procedure"
+echo "Ended build procedure."
 
 cd ..

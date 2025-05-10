@@ -1,14 +1,14 @@
-#include <string>
-#include <vector>
 #include <filesystem>
 #include <fstream>
 #include <print>
+
+#include "cmd_template.hpp"
 
 namespace fs = std::filesystem;
 
 void add_content_to_folder(const std::string& path);
 
-extern "C" __declspec(dllexport) int proc(const std::vector<std::string>& args) {
+MAIN_FUNC(const args_t& args) {
   if (fs::is_directory(args[2])) {
     std::println("Directory {} already exists.", args[2]);
     return 0;

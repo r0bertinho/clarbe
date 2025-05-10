@@ -1,10 +1,11 @@
-#include <print>
-#include <vector>
-#include <string>
 #include <windows.h>
 
-#include "consts.hpp"
+#include <print>
+#include <string>
+#include <vector>
+
 #include "commands.hpp"
+#include "consts.hpp"
 
 typedef int (*CMD_func)(const std::vector<std::string>&);
 
@@ -25,14 +26,15 @@ int main(int argc, char** argv) {
   for (int i = 1; i < argc; i++) {
     args.push_back(std::string(argv[i]));
   }
-  
+
   // Check if it's a basic command
   if (commands.contains(args[0])) {
     return commands[args[0]](args);
   }
 
   // Load the command's DLL
-  HMODULE dll_file = LoadLibrary((clarbe_env + "/bin/" + args[0] + ".dll").c_str());
+  HMODULE dll_file =
+      LoadLibrary((clarbe_env + "/bin/" + args[0] + ".dll").c_str());
   if (!dll_file) {
     std::println("Could not find command '{}'.", args[0]);
     return 1;
