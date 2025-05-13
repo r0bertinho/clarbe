@@ -1,12 +1,33 @@
 #include <filesystem>
 #include <print>
 #include <cstdlib>
+#include <map>
+#include <functional>
+#include <string>
 
 #include "cmd_template.hpp"
 #include "consts.hpp"
 #include "toml.hpp"
 
+#define FLAG_OP_L [](Flags_t& flags, const int place, const args_t& args)
+
 namespace fs = std::filesystem;
+
+// default values for flags
+struct Flags_s {
+  bool cmd_window = true;
+};
+
+typedef struct Flag_s Flags_t;
+
+const std::map<std::string, std::function<void(Flags_t&, const int, const args_t&)>> flag_op = {
+  {"--no_window", FLAG_OP_L {
+    flags.cmd_window = false;
+    return 0;
+  }}
+};
+
+std::string return_flags(const Flags_t&);
 
 MAIN_FUNC(const args_t& args) {
   if (!fs::exists("clarbe.toml")) {
@@ -59,6 +80,21 @@ MAIN_FUNC(const args_t& args) {
     *std = "-std=" + *std;
   }
 
+  Flags_t compilation_flags;
+
+  // recognize arguments given in toml file
+
+  int f_iter = 0;
+
+  for (std::string flag : args) {
+    if (flag_op.contains(flag)) {
+      flag_op[flag](compilation_flags, f_iter, args);
+    } else {
+      std::println("flag \"{}\" not found.", flag);
+    }
+    f_iter++;
+  }
+
   fs::create_directories("target/object");
   fs::create_directories("target/bin");
 
@@ -84,7 +120,7 @@ MAIN_FUNC(const args_t& args) {
     for (const auto& entry : fs::directory_iterator(dir)) {
       const std::string path = entry.path().string();
       const std::string filename = entry.path().stem().string();
-      std::system((*compiler + " -c " + path + " -o target/object/" + filename + ".o " + *std + " " + includes).c_str());
+      std::system((*compiler + " -c " + path + " -o target/object/" + filename + ".o " + *std + " " + includes + return_flags(compilation_flags)).c_str());
     }
   }
 
@@ -98,7 +134,17 @@ MAIN_FUNC(const args_t& args) {
     *pkg_name += ".dll";
   }
 
-  std::system((*compiler + " " + pre + " -o target/bin/" + *pkg_name + " target/object/*.o " + *std + " " + includes).c_str());
+  std::system((*compiler + " " + pre + " -o target/bin/" + *pkg_name + " target/object/*.o " + *std + " " + includes + return_flags(compilation_flags)).c_str());
 
   return 0;
+}
+
+std::string return_flags(const Flags_t& flags) {
+  std::string ret = "";
+
+  if (!flags.cmd_window) {
+    ret += " -mwindows ";
+  }
+
+  return ret;
 }
