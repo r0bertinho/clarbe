@@ -24,3 +24,14 @@ hence the compiler is not yet functional, the project manager will be a wrapper 
 - Create a environment variable 'CLARBE_HOME' and add 'CLARBE_HOME/bin' to path
 - Download the zipped source code, unzip and in the directory run in bash terminal ```bash build.sh```
 - now run in terminal ```clarbe version```
+
+## Usage
+- use ```clarbe new <project_name>``` or go to an empty directory and use ```clarbe init```
+- in the project directory there should be an include and source folders, as well as a "clarbe.toml" file.
+- (Optional): If you want to change the compiler used, write:
+> > ```toml
+> > [build]
+> > compiler="compiler_name"
+> > ```
+- Now write what you wish for the source code and run ```clarbe build```, then ```clarbe run```
+- XoXo: Sleep deprived programmer.
