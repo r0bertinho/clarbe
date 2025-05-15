@@ -27,7 +27,7 @@ done
 echo "Building compiler binary:"
 
 # Link all object files to create the final binary
-$CXX -o bin/clarbe.exe *.o $INC $LIBS $CXXFLAGS
+$CXX -o bin/clarbe *.o $INC $LIBS $CXXFLAGS
 
 mkdir -p cmd
 

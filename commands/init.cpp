@@ -97,8 +97,7 @@ void create_plugin_template(const std::string& path) {
               << "version = \"0.0.1\"" << '\n'
               << '\n'
               << "[build]" << '\n'
-              << "compiler = \"clang++\""
-              << '\n'
+              << "compiler = \"clang++\"" << '\n'
               << "[local]" << '\n'
               << "sources = [\"src\"]" << '\n'
               << "includes = [\"inc\"]" << '\n'

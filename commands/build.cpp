@@ -1,35 +1,60 @@
-#include <filesystem>
-#include <print>
 #include <cstdlib>
-#include <map>
+#include <filesystem>
 #include <functional>
+#include <map>
+#include <print>
 #include <string>
 
 #include "cmd_template.hpp"
 #include "consts.hpp"
 #include "toml.hpp"
 
-#define FLAG_OP_L [](Flags_t& flags, const int place, const args_t& args)
-
 namespace fs = std::filesystem;
 
 // default values for flags
-struct Flags_s {
+class Flags_t {
+ public:
   bool cmd_window = true;
+  bool debug = false;
+  int optimization = 0;
 };
 
-typedef struct Flag_s Flags_t;
+#define FLAG_OP_L \
+  [](Flags_t & flags, const int place, const args_t& args) -> int
 
-const std::map<std::string, std::function<void(Flags_t&, const int, const args_t&)>> flag_op = {
-  {"--no_window", FLAG_OP_L {
-    flags.cmd_window = false;
+std::map<std::string, std::function<int(Flags_t&, const int, const args_t&)>>
+    flag_op = {{"--no_window", FLAG_OP_L{flags.cmd_window = false;
+return 0;
+}
+}
+, {"--optimize", FLAG_OP_L{flags.optimization = stoi(args[place + 1]);
+return 0;
+}
+}
+, {
+  "--debug", FLAG_OP_L {
+    flags.debug = true;
     return 0;
-  }}
-};
+  }
+}
+}
+;
 
 std::string return_flags(const Flags_t&);
+void handle_os_includes(std::string& incs, const std::string& path);
 
 MAIN_FUNC(const args_t& args) {
+  if (args[1] == "help") {
+    std::println("Availible commands:");
+
+    for (std::map<std::string, std::function<int(Flags_t&, const int,
+                                                 const args_t&)>>::iterator
+             iter = flag_op.begin();
+         iter != flag_op.end(); ++iter) {
+      std::println("\t| {};", iter->first);
+    }
+  }
+
   if (!fs::exists("clarbe.toml")) {
     std::println("Project file not detected.");
     return 0;
@@ -46,60 +71,67 @@ MAIN_FUNC(const args_t& args) {
     return 1;
   }
 
-  std::optional<std::string> pkg_name = local_config["package"]["name"].value<std::string>();
+  std::string compiler = "";
+  std::string pkg_name = "";
+  std::string used_flags = " ";
+  std::string includes = "";
+  std::string pre = "";
+  std::string std = "";
+  Flags_t compilation_flags;
 
-  if (!pkg_name) {
+  if (local_config["package"]["name"]) {
+    pkg_name = *(local_config["package"]["name"].value<std::string>());
+  } else {
     std::println("package name not defined.");
+    return 1;
   }
 
-  const auto& source_directories = local_config["local"]["sources"].as_array();
-  const auto& include_directories = local_config["local"]["includes"].as_array();
-
-  if (!source_directories) {
-    std::println("Source directories not defined properly.");
-  } else if (!include_directories) {
-    std::println("Source directories not defined properly.");
-  }
-
-  std::optional<std::string> compiler = local_config["build"]["compiler"].value<std::string>();
-
-  if (!compiler) /* compiler does not exist */ {
-    compiler = global_config["build"]["compiler"].value<std::string>();
-  }
-  
-  if (!compiler) {
+  if (local_config["build"]["compiler"]) {
+    compiler = *(local_config["build"]["compiler"].value<std::string>());
+  } else if (global_config["build"]["compiler"]) {
+    compiler = *(global_config["build"]["compiler"].value<std::string>());
+  } else {
     std::println("No compiler provided.");
     return 1;
   }
 
-  std::optional<std::string> std = local_config["package"]["std"].value<std::string>();
-
-  if (!std) /* std not defined */ {
-    *std = "";
-  } else {
-    *std = "-std=" + *std;
+  if (local_config["package"]["std"]) {
+    std =
+        " -std=" + *(local_config["package"]["std"].value<std::string>()) + " ";
+  } else if (global_config["package"]["std"]) {
+    std = " -std=" + *(global_config["package"]["std"].value<std::string>()) +
+          " ";
   }
 
-  Flags_t compilation_flags;
-
-  // recognize arguments given in toml file
-
-  int f_iter = 0;
-
-  for (std::string flag : args) {
-    if (flag_op.contains(flag)) {
-      flag_op[flag](compilation_flags, f_iter, args);
-    } else {
-      std::println("flag \"{}\" not found.", flag);
+  if (local_config["build"]["libs"]) {
+    const auto& lib_flags_from_toml =
+        *(local_config["build"]["libs"].as_array());
+    for (const auto& node : lib_flags_from_toml) {
+      const std::string lib = node.as_string()->get();
+      used_flags += "-l" + lib + " ";
     }
-    f_iter++;
+  }
+
+  // recognize arguments from cli
+  for (int i = 1; i < args.size(); i++) {
+    if (flag_op.contains(args[i])) {
+      flag_op.at(args[i])(compilation_flags, i, args);
+    } else if (args[i] == "-add-") {
+      for (int j = i + 1; j < args.size(); j++) {
+        used_flags += args[j] + " ";
+      }
+
+      break;
+    }
   }
 
   fs::create_directories("target/object");
   fs::create_directories("target/bin");
 
-  std::optional<bool> using_usr_macro = local_config["uses"]["macro_file"].value<bool>();
-  std::optional<bool> using_usr_build = local_config["uses"]["macro_file"].value<bool>();
+  std::optional<bool> using_usr_macro =
+      local_config["uses"]["macro_file"].value<bool>();
+  std::optional<bool> using_usr_build =
+      local_config["uses"]["macro_file"].value<bool>();
 
   if (using_usr_macro) {
     // use macros file
@@ -109,10 +141,48 @@ MAIN_FUNC(const args_t& args) {
     // use build file
   }
 
-  std::string includes = "";
-  for (const auto& node : *include_directories) {
-    includes += "-I " + node.as_string()->get() + " ";
+  const auto& source_directories = local_config["local"]["sources"].as_array();
+
+  if (!source_directories) {
+    std::println("Source directories not defined properly.");
   }
+
+  if (local_config["local"]["includes"]) {
+    const auto& include_directories =
+        *(local_config["local"]["includes"].as_array());
+
+    for (const auto& node : include_directories) {
+      includes += "-I " + node.as_string()->get() + " ";
+    }
+  }
+
+  if (local_config["local"]["os_includes"]) {
+    const auto& include_directories =
+        *(local_config["local"]["os_includes"].as_array());
+
+    for (const auto& node : include_directories) {
+      handle_os_includes(includes, node.as_string()->get());
+    }
+  }
+
+  if (local_config["build"]["debug_info"]) {
+    compilation_flags.debug =
+        *(local_config["build"]["debug_info"].value<bool>());
+  }
+
+  if (local_config["package"]["build_type"]) {
+    std::string build_type =
+        *(local_config["package"]["build_type"].value<std::string>());
+
+    if (build_type == "exec") {
+      // build executable
+    } else if (build_type == "plugin" || build_type == "dll") {
+      pre = "-shared";
+      pkg_name += ".dll";
+    }
+  }
+
+  used_flags += return_flags(compilation_flags);
 
   // compile source to .obj files
   for (const auto& node : *source_directories) {
@@ -120,21 +190,15 @@ MAIN_FUNC(const args_t& args) {
     for (const auto& entry : fs::directory_iterator(dir)) {
       const std::string path = entry.path().string();
       const std::string filename = entry.path().stem().string();
-      std::system((*compiler + " -c " + path + " -o target/object/" + filename + ".o " + *std + " " + includes + return_flags(compilation_flags)).c_str());
+      std::system((compiler + " -c " + path + " -o target/object/" + filename +
+                   ".o " + std + includes + used_flags)
+                      .c_str());
     }
   }
 
-  std::string pre = "";
-  std::optional<std::string> build_type = local_config["package"]["build_type"].value<std::string>();
-
-  if (!build_type || *build_type == "exec") {
-    // build executable
-  } else if (*build_type == "plugin" || *build_type == "dll") {
-    pre = "-shared";
-    *pkg_name += ".dll";
-  }
-
-  std::system((*compiler + " " + pre + " -o target/bin/" + *pkg_name + " target/object/*.o " + *std + " " + includes + return_flags(compilation_flags)).c_str());
+  std::system((compiler + " " + pre + " -o target/bin/" + pkg_name +
+               " target/object/*.o " + std + " " + includes + used_flags)
+                  .c_str());
 
   return 0;
 }
@@ -146,5 +210,45 @@ std::string return_flags(const Flags_t& flags) {
     ret += " -mwindows ";
   }
 
+  if (flags.optimization == 0) {
+    ret += " -O0 ";
+  } else if (flags.optimization == 1) {
+    ret += " -O1 ";
+  } else if (flags.optimization == 2) {
+    ret += " -O2 ";
+  } else if (flags.optimization == 3) {
+    ret += " -O3 ";
+  } else {
+    std::println("optimization level \'{}\' not found, using default...",
+                 flags.optimization);
+  }
+
+  if (flags.debug == true) {
+    ret += " -g ";
+  }
+
   return ret;
+}
+
+void handle_os_includes(std::string& incs, const std::string& path) {
+#if defined(__linux__)
+  incs += "-I " + path + "/linux ";
+#elif defined(_WIN32)
+  incs += "-I " + path + "/win32 ";
+#elif defined(_WIN64)
+  incs += "-I " + path + "/win64 ";
+/*
+#elif defined(__sun)
+#elif defined(__FreeBSD__)
+#elif defined(__NetBSD__)
+#elif defined(__OpenBSD__)
+#elif defined(__APPLE__)
+#elif defined(__hpux)
+#elif defined(__osf__)
+#elif defined(__sgi)
+#elif defined(_AIX)
+*/
+#else
+#error Platform not supported
+#endif
 }

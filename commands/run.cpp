@@ -15,7 +15,9 @@ MAIN_FUNC(const args_t& args) {
 
   toml::table local_config = toml::parse_file("clarbe.toml");
 
-  std::system(("target\\bin\\" + *(local_config["package"]["name"].value<std::string>())).c_str());
+  std::system(("target\\bin\\" +
+               *(local_config["package"]["name"].value<std::string>()))
+                  .c_str());
 
   return 0;
 }
