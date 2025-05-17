@@ -22,7 +22,7 @@ hence the compiler is not yet functional, the project manager will be a wrapper 
 
 ## Installation
 - Create a environment variable 'CLARBE_HOME' and add 'CLARBE_HOME/bin' to path
-- Download the zipped source code, unzip and in the directory run in bash terminal ```bash build.sh```
+- Download the zipped executable, place the contents in 'CLARBE_HOME/bin'
 - now run in terminal ```clarbe version```
 
 ## Usage

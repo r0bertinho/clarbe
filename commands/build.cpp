@@ -182,6 +182,11 @@ MAIN_FUNC(const args_t& args) {
     }
   }
 
+  if (local_config["build"]["extra"]) {
+    const std::string extra_commands = local_config["build"]["extra"].as_string()->get();
+    used_flags += " " + extra_commands;
+  }
+
   used_flags += return_flags(compilation_flags);
 
   // compile source to .obj files
@@ -193,6 +198,26 @@ MAIN_FUNC(const args_t& args) {
       std::system((compiler + " -c " + path + " -o target/object/" + filename +
                    ".o " + std + includes + used_flags)
                       .c_str());
+    }
+  }
+
+  if (local_config["local"]["dlls_dir"]) {
+    fs::create_directories("target/dlls");
+    const auto& dll_files_dir = *(local_config["local"]["dlls_dir"].as_array());
+
+    for (const auto& node : dll_files_dir) {
+      const std::string dir = node.as_string()->get();
+
+      for (const auto& entry : fs::directory_iterator(dir)) {
+        const std::string path = entry.path().string();
+        const std::string filename = entry.path().stem().string();
+        std::system((compiler + " -c " + path + " -o target/dlls/" + filename +
+                    ".dll.o " + std + includes + used_flags)
+                        .c_str());
+        std::system((compiler + " -shared " + pre + " -o target/bin/" + filename + ".dll target/dlls/" + filename +
+                    ".dll.o " + std + includes + used_flags)
+                        .c_str());
+      }
     }
   }
 

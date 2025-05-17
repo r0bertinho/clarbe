@@ -1,13 +1,18 @@
 #include <windows.h>
 
 #include <print>
+#include <cstdlib>
 #include <string>
 #include <vector>
 
 #include "commands.hpp"
 #include "consts.hpp"
+#include "toml.hpp"
 
 typedef int (*CMD_func)(const std::vector<std::string>&);
+
+void run_toml_before_cmd();
+void run_toml_after_cmd();
 
 int main(int argc, char** argv) {
   if (clarbe_env == "null") {
@@ -29,7 +34,10 @@ int main(int argc, char** argv) {
 
   // Check if it's a basic command
   if (commands.contains(args[0])) {
-    return commands[args[0]](args);
+    run_toml_before_cmd();
+    int ret = commands[args[0]](args);
+    run_toml_after_cmd();
+    return ret;
   }
 
   // Load the command's DLL
@@ -48,11 +56,46 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  // Call the 'proc' function
+  run_toml_before_cmd();
   int ret = proc(args);
+  run_toml_after_cmd();
 
-  // Clean up
   FreeLibrary(dll_file);
-
   return ret;
+}
+
+void run_toml_before_cmd() {
+  toml::table local_config;
+
+  try {
+    local_config = toml::parse_file("clarbe.toml");
+  } catch (const toml::parse_error& err) {
+    std::println("Error parsing config file:\n{}\n", err.description());
+  }
+
+  if (local_config["build"]["run_before"]) {
+    const auto& commands = *(local_config["build"]["run_before"].as_array());
+
+    for (const auto& node : commands) {
+      std::system(node.as_string()->get().c_str());
+    }
+  }
+}
+
+void run_toml_after_cmd() {
+  toml::table local_config;
+
+  try {
+    local_config = toml::parse_file("clarbe.toml");
+  } catch (const toml::parse_error& err) {
+    std::println("Error parsing config file:\n{}\n", err.description());
+  }
+
+  if (local_config["build"]["run_after"]) {
+    const auto& commands = *(local_config["build"]["run_after"].as_array());
+
+    for (const auto& node : commands) {
+      std::system(node.as_string()->get().c_str());
+    }
+  }
 }

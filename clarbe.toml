@@ -1,0 +1,22 @@
+[package]
+name = "clarbe"
+std = "c++26"
+build_type = "exec"
+version = "0.0.1"
+
+[local]
+sources = ["src"]
+includes = ["include", "tomlplusplus"]
+dlls_dir = ["commands"]
+
+[build]
+run_before = ["git clone https://github.com/marzer/tomlplusplus.git",
+              "git -C tomlplusplus pull https://github.com/marzer/tomlplusplus.git"]
+run_after = ["bash format.sh", "cp -a \"target/bin\" \"%CLARBE_HOME%/bin/\""]
+libs = ["stdc++exp"]
+debug_info = true
+compiler = "clang++"
+
+[uses]
+macro_file = false
+build_file = false

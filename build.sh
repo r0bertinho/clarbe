@@ -1,6 +1,6 @@
 CXX="/d/msys64/mingw64/bin/clang++.exe"
-CXXFLAGS="-std=c++26 -lstdc++exp -O0 -g"
-LIBS="-lcurl"
+CXXFLAGS="-std=c++26 -O0 -g"
+LIBS="-lcurl -lstdc++exp"
 INC="-I ../include -I ../third-party/tomlplusplus -I ../third-party/rapidjson/include -I ../third-party/curl/include"
 
 mkdir -p third-party
