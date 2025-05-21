@@ -1,6 +1,13 @@
+#if defined(__linux__)
+#include <dlfcn.h>
+#include <unistd.h>
+#elif defined(_WIN32)
 #include <windows.h>
+#else
+#error "platform not supported"
+#endif
 
-#include <print>
+#include <iostream>
 #include <cstdlib>
 #include <string>
 #include <vector>
@@ -16,14 +23,14 @@ void run_toml_after_cmd();
 
 int main(int argc, char** argv) {
   if (clarbe_env == "null") {
-    std::println("Environment variable 'CLARBE_HOME' not defined.");
+    std::cout << "Environment variable 'CLARBE_HOME' not defined.\n";
     return 1;
   }
 
   std::vector<std::string> args;
 
   if (argc == 1) {
-    std::println("No arguments provided, try 'help'.");
+    std::cout << "No arguments provided, try 'help'.\n";
     return 1;
   }
 
@@ -40,19 +47,33 @@ int main(int argc, char** argv) {
     return ret;
   }
 
-  // Load the command's DLL
-  HMODULE dll_file =
-      LoadLibrary((clarbe_env + "/bin/" + args[0] + ".dll").c_str());
+  // Load the command's shared library or DLL
+  #if defined(__linux__)
+  void* dll_file = dlopen((clarbe_env + "/bin/" + args[0] + ".so").c_str(), RTLD_LAZY);
+  #elif defined(_WIN32)
+  HMODULE dll_file = LoadLibrary((clarbe_env + "/bin/" + args[0] + ".dll").c_str());
+  #endif
+
   if (!dll_file) {
-    std::println("Could not find command '{}'.", args[0]);
+    std::cout << "Could not find command '" << args[0] << "'.\n";
     return 1;
   }
 
   // Get the address of the 'proc' function
-  CMD_func proc = (CMD_func)GetProcAddress(dll_file, "proc");
+  CMD_func proc = nullptr;
+  #if defined(__linux__)
+  proc = (CMD_func)dlsym(dll_file, "proc");
+  #elif defined(_WIN32)
+  proc = (CMD_func)GetProcAddress(dll_file, "proc");
+  #endif
+
   if (!proc) {
-    std::println("Could not locate main function in command.\n");
+    std::cout << "Could not locate main function in command.\n";
+    #if defined(__linux__)
+    dlclose(dll_file);
+    #elif defined(_WIN32)
     FreeLibrary(dll_file);
+    #endif
     return 1;
   }
 
@@ -60,7 +81,12 @@ int main(int argc, char** argv) {
   int ret = proc(args);
   run_toml_after_cmd();
 
+  #if defined(__linux__)
+  dlclose(dll_file);
+  #elif defined(_WIN32)
   FreeLibrary(dll_file);
+  #endif
+
   return ret;
 }
 
@@ -70,7 +96,7 @@ void run_toml_before_cmd() {
   try {
     local_config = toml::parse_file("clarbe.toml");
   } catch (const toml::parse_error& err) {
-    std::println("Error parsing config file:\n{}\n", err.description());
+    std::cout << "Error parsing config file:\n" << err.description() << "\n";
   }
 
   if (local_config["build"]["run_before"]) {
@@ -88,7 +114,7 @@ void run_toml_after_cmd() {
   try {
     local_config = toml::parse_file("clarbe.toml");
   } catch (const toml::parse_error& err) {
-    std::println("Error parsing config file:\n{}\n", err.description());
+    std::cout << "Error parsing config file:\n" << err.description() << "\n";
   }
 
   if (local_config["build"]["run_after"]) {
